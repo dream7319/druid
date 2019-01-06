@@ -741,6 +741,9 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
 
         final ReentrantLock lock = this.lock;
         try {
+            //当通过这个方法去获取锁时，如果其他线程正在等待获取锁，则这个线程能够响应中断，即中断线程的等待状态。
+            // 也就使说，当两个线程同时通过lock.lockInterruptibly()想获取某个锁时，假若此时线程A获取到了锁，
+            // 而线程B只有等待，那么对线程B调用threadB.interrupt()方法能够中断线程B的等待过程
             lock.lockInterruptibly();
         } catch (InterruptedException e) {
             throw new SQLException("interrupt", e);
@@ -753,10 +756,12 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
             }
 
             initStackTrace = Utils.toString(Thread.currentThread().getStackTrace());
-
+            //id=1
             this.id = DruidDriver.createDataSourceId();
             if (this.id > 1) {
                 long delta = (this.id - 1) * 100000;
+                //以原子方式将给定值添加到此更新器管理的给定对象的字段的当前值。
+                //connectionIdSeed 初始值为10000L， 调用此方法则会原子性操作 给 connectionIdSeed+delta
                 this.connectionIdSeedUpdater.addAndGet(this, delta);
                 this.statementIdSeedUpdater.addAndGet(this, delta);
                 this.resultSetIdSeedUpdater.addAndGet(this, delta);
@@ -767,7 +772,7 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
                 this.jdbcUrl = this.jdbcUrl.trim();
                 initFromWrapDriverUrl();
             }
-
+            //此时的filters已经从META-INF/druid-filter.properties把filter加载进来了
             for (Filter filter : filters) {
                 filter.init(this);
             }
@@ -862,6 +867,7 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
             SQLException connectError = null;
 
             if (createScheduler != null && asyncInit) {
+                //异步初始化连接池
                 for (int i = 0; i < initialSize; ++i) {
                     createTaskCount++;
                     CreateConnectionTask task = new CreateConnectionTask(true);
@@ -869,6 +875,7 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
                 }
             } else if (!asyncInit) {
                 // init connections
+                //初始化连接池
                 while (poolingCount < initialSize) {
                     try {
                         PhysicalConnectionInfo pyConnectInfo = createPhysicalConnection();
@@ -890,9 +897,11 @@ public class DruidDataSource extends DruidAbstractDataSource implements DruidDat
                     poolingPeakTime = System.currentTimeMillis();
                 }
             }
-
+            //创建记录日志的线程
             createAndLogThread();
+            //创建并启动创建 连接的线程
             createAndStartCreatorThread();
+            //创建并启动销毁 连接的线程
             createAndStartDestroyThread();
 
             initedLatch.await();

@@ -34,7 +34,7 @@ public class JdbcUtilsTest extends TestCase {
         dataSource.setMinIdle(1);
         dataSource.setUrl("jdbc:h2:mem:test;");
         dataSource.setTestOnBorrow(false);
-
+        dataSource.setFilters("stat");
         JdbcUtils.execute(dataSource, "CREATE TABLE user (id INT, name VARCHAR(40))");
 
     }

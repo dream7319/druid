@@ -1518,7 +1518,7 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
     protected volatile long resultSetIdSeed   = 50000L;
     protected volatile long transactionIdSeed = 60000L;
     protected volatile long metaDataIdSeed    = 80000L;
-
+    //为对象创建并返回一个具有给定字段的更新器。需要 Class 参数检查反射类型和一般类型是否匹配。
     final static AtomicLongFieldUpdater<DruidAbstractDataSource> connectionIdSeedUpdater  = AtomicLongFieldUpdater.newUpdater(DruidAbstractDataSource.class, "connectionIdSeed");
     final static AtomicLongFieldUpdater<DruidAbstractDataSource> statementIdSeedUpdater   = AtomicLongFieldUpdater.newUpdater(DruidAbstractDataSource.class, "statementIdSeed");
     final static AtomicLongFieldUpdater<DruidAbstractDataSource> resultSetIdSeedUpdater   = AtomicLongFieldUpdater.newUpdater(DruidAbstractDataSource.class, "resultSetIdSeed");
@@ -1526,6 +1526,7 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
     final static AtomicLongFieldUpdater<DruidAbstractDataSource> metaDataIdSeedUpdater    = AtomicLongFieldUpdater.newUpdater(DruidAbstractDataSource.class, "metaDataIdSeed");
 
     public long createConnectionId() {
+        //以原子方式将此更新器管理的给定对象字段当前值加 1。
         return connectionIdSeedUpdater.incrementAndGet(this);
     }
 
@@ -1633,19 +1634,20 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
         createStartNanosUpdater.set(this, connectStartNanos);
         creatingCountUpdater.incrementAndGet(this);
         try {
+            //此时返回的是一个代理连接 ConnectionProxy
             conn = createPhysicalConnection(url, physicalConnectProperties);
             connectedNanos = System.nanoTime();
 
             if (conn == null) {
                 throw new SQLException("connect error, url " + url + ", driverClass " + this.driverClass);
             }
-
+            //初始化物理连接属性，variables保存show variables属性， globalVariables 保存 show global variables，只有mysql才会收集
             initPhysicalConnection(conn, variables, globalVariables);
             initedNanos = System.nanoTime();
-
+            //如果配置了validationQuery，则此时去验证
             validateConnection(conn);
             validatedNanos = System.nanoTime();
-
+            //创建连接成功
             setFailContinuous(false);
             setCreateError(null);
         } catch (SQLException ex) {
@@ -1703,6 +1705,21 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
         initPhysicalConnection(conn, null, null);
     }
 
+    /**
+     * 初始化物理连接
+     * 设置连接属性
+     * 1、是否自动提交
+     * 2、是否只读
+     * 3、默认的事务隔离级别
+     * 4、默认策略
+     * 5、初始化sql的执行
+     * 6、show variables 数据的收集
+     * 7、show global variables  mysql全局变量的收集
+     * @param conn
+     * @param variables
+     * @param globalVariables
+     * @throws SQLException
+     */
     public void initPhysicalConnection(Connection conn, Map<String, Object> variables, Map<String, Object> globalVariables) throws SQLException {
         if (conn.getAutoCommit() != defaultAutoCommit) {
             conn.setAutoCommit(defaultAutoCommit);
@@ -1713,7 +1730,8 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
                 conn.setReadOnly(defaultReadOnly);
             }
         }
-
+        //默认的事务隔离级别 Connection.TRANSACTION_NONE\TRANSACTION_READ_UNCOMMITTED等
+        //0,1,2,4,8
         if (getDefaultTransactionIsolation() != null) {
             if (conn.getTransactionIsolation() != getDefaultTransactionIsolation().intValue()) {
                 conn.setTransactionIsolation(getDefaultTransactionIsolation());
@@ -1723,14 +1741,14 @@ public abstract class DruidAbstractDataSource extends WrapperAdapter implements 
         if (getDefaultCatalog() != null && getDefaultCatalog().length() != 0) {
             conn.setCatalog(getDefaultCatalog());
         }
-
+        //初始化SQL
         Collection<String> initSqls = getConnectionInitSqls();
         if (initSqls.size() == 0
                 && variables == null
                 && globalVariables == null) {
             return;
         }
-
+        //执行初始化sql
         Statement stmt = null;
         try {
             stmt = conn.createStatement();

@@ -238,13 +238,9 @@
 			<activation>
 				<activeByDefault>true</activeByDefault>
 				<file>
-					<exists>${env.JAVA_HOME}/lib/jconsole.jar</exists>
+					<exists>${JAVA_HOME}/lib/jconsole.jar</exists>
 				</file>
 			</activation>
-			<properties>
-				<toolsjar>${env.JAVA_HOME}/lib/tools.jar</toolsjar>
-				<jconsolejar>${env.JAVA_HOME}/lib/jconsole.jar</jconsolejar>
-			</properties>
 
 			<dependencies>
 				<dependency>
@@ -546,6 +542,12 @@
 			<artifactId>calcite-core</artifactId>
 			<version>1.14.0</version>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>guava</artifactId>
+					<groupId>com.google.guava</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -610,6 +612,16 @@
 			<artifactId>bonecp</artifactId>
 			<version>0.8.0.RELEASE</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>guava</artifactId>
+					<groupId>com.google.guava</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>slf4j-api</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.jolbox</groupId>

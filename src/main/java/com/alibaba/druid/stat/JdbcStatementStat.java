@@ -25,9 +25,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class JdbcStatementStat implements JdbcStatementStatMBean {
-
+    //执行createStatement的计数
     private final AtomicLong    createCount      = new AtomicLong(0);                                     // 执行createStatement的计数
+    //执行parepareStatement的计数
     private final AtomicLong    prepareCount     = new AtomicLong(0);                                     // 执行parepareStatement的计数
+    //执行preCall的计数
     private final AtomicLong    prepareCallCount = new AtomicLong(0);                                     // 执行preCall的计数
     private final AtomicLong    closeCount       = new AtomicLong(0);                                     // Statement关闭的计数
 

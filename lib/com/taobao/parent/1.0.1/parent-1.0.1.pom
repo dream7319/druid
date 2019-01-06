@@ -51,7 +51,7 @@
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
-	<distributionManagement>
+	<!--<distributionManagement>
 		<repository>
 			<id>releases</id>
 			<url>http://mvnrepo.taobao.ali.com/mvn/releases</url>
@@ -60,7 +60,7 @@
 			<id>snapshots</id>
 			<url>http://mvnrepo.taobao.ali.com/mvn/snapshots</url>
 		</snapshotRepository>
-	</distributionManagement>
+	</distributionManagement>-->
 	<build>
 
 		<plugins>
@@ -93,7 +93,6 @@
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
 					<charset>UTF16</charset>
-					<aggregate>true</aggregate>
 				</configuration>
 			</plugin>
 

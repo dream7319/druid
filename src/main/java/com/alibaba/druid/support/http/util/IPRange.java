@@ -35,7 +35,7 @@ public class IPRange {
     private IPAddress ipSubnetMask          = null;
 
     /** extended network prefix */
-    private int       extendedNetworkPrefix = 0;
+    private int extendedNetworkPrefix = 0;
 
     public IPRange(String range){
         parseRange(range);

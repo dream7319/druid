@@ -26,6 +26,7 @@ public class MySqlVisitorDemo extends TestCase {
 
         SQLTableSource tableSource = visitor.getAliasMap().get("a");
         System.out.println(tableSource);
+        System.out.println(visitor.getAliasMap());
     }
 
     public static class ExportTableAliasVisitor extends MySqlASTVisitorAdapter {

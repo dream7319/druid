@@ -145,6 +145,7 @@ public class FilterChainImpl implements FilterChain {
     }
 
     public ConnectionProxy connection_connect(Properties info) throws SQLException {
+        //调用所有过滤器
         if (this.pos < filterSize) {
             return nextFilter()
                     .connection_connect(this, info);
@@ -158,7 +159,7 @@ public class FilterChainImpl implements FilterChain {
         if (nativeConnection == null) {
             return null;
         }
-
+        //返回代理连接
         return new ConnectionProxyImpl(dataSource, nativeConnection, info, dataSource.createConnectionId());
     }
 
